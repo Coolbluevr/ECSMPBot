@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-
+print("Token loaded:", TOKEN is not None)
+print("Length:", len(TOKEN) if TOKEN else 0)
+print("Starts with:", TOKEN[:10] if TOKEN else "None")
 intents = discord.Intents.default()
 intents.message_content = True
 
