@@ -34,12 +34,18 @@ async def serverstats(ctx):
     server = JavaServer.lookup(f"{ip}:{port}")
 
     try:
-        # mcstatus is blocking → run in thread so bot doesn't freeze
         status = await asyncio.to_thread(server.status)
         data = status.raw
 
-        online = data.get("players", {}).get("online", 0)
-        max_players = data.get("players", {}).get("max", "?")
+        # safer player handling (Aternos fix)
+        players = data.get("players", {})
+
+        online = players.get("online", 0)
+
+        # Aternos often does NOT send max
+        max_players = players.get("max")
+        if max_players is None:
+            max_players = 20  # fallback value
 
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
@@ -48,7 +54,14 @@ async def serverstats(ctx):
 
         embed.add_field(name="Status", value="🟢 Online", inline=True)
         embed.add_field(name="Players", value=f"{online}/{max_players}", inline=True)
-        embed.add_field(name="Ping", value=f"{round(status.latency)}ms", inline=True)
+
+        # latency safe handling
+        ping = getattr(status, "latency", None)
+        embed.add_field(
+            name="Ping",
+            value=f"{round(ping)}ms" if ping else "N/A",
+            inline=True
+        )
 
         await loading.edit(content=None, embed=embed)
         return
