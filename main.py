@@ -59,9 +59,7 @@ max_players = data.get("players", {}).get("max", "?")
         await loading.edit(content=None, embed=embed)
         return
 
-    except:
-        pass
-
+except:
     try:
         ping = server.ping()
 
