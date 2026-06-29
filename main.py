@@ -3,6 +3,7 @@ from discord.ext import commands
 from mcstatus import JavaServer
 import os
 from dotenv import load_dotenv
+import asyncio
 
 load_dotenv()
 
@@ -33,7 +34,8 @@ async def serverstats(ctx):
     server = JavaServer.lookup(f"{ip}:{port}")
 
     try:
-        status = server.status()
+        # mcstatus is blocking → run in thread so bot doesn't freeze
+        status = await asyncio.to_thread(server.status)
         data = status.raw
 
         online = data.get("players", {}).get("online", 0)
@@ -45,44 +47,36 @@ async def serverstats(ctx):
         )
 
         embed.add_field(name="Status", value="🟢 Online", inline=True)
-        embed.add_field(
-            name="Players",
-            value=f"{online}/{max_players}",
-            inline=True
-        )
-        embed.add_field(
-            name="Ping",
-            value=f"{round(status.latency)}ms",
-            inline=True
-        )
+        embed.add_field(name="Players", value=f"{online}/{max_players}", inline=True)
+        embed.add_field(name="Ping", value=f"{round(status.latency)}ms", inline=True)
 
         await loading.edit(content=None, embed=embed)
         return
 
-except:
-    try:
-        ping = server.ping()
-
-        embed = discord.Embed(
-            title="🎮 Minecraft Server Stats",
-            color=0x00ff00
-        )
-
-        embed.add_field(name="Status", value="🟢 Online", inline=True)
-        embed.add_field(name="Ping", value=f"{round(ping)}ms", inline=True)
-        embed.add_field(name="Players", value="0/?", inline=True)
-
-        await loading.edit(content=None, embed=embed)
-
     except:
-        embed = discord.Embed(
-            title="🎮 Minecraft Server Stats",
-            color=0xff0000
-        )
+        try:
+            ping = await asyncio.to_thread(server.ping)
 
-        embed.add_field(name="Status", value="🔴 Offline", inline=True)
+            embed = discord.Embed(
+                title="🎮 Minecraft Server Stats",
+                color=0x00ff00
+            )
 
-        await loading.edit(content=None, embed=embed)
+            embed.add_field(name="Status", value="🟢 Online", inline=True)
+            embed.add_field(name="Ping", value=f"{round(ping)}ms", inline=True)
+            embed.add_field(name="Players", value="0/?", inline=True)
+
+            await loading.edit(content=None, embed=embed)
+
+        except:
+            embed = discord.Embed(
+                title="🎮 Minecraft Server Stats",
+                color=0xff0000
+            )
+
+            embed.add_field(name="Status", value="🔴 Offline", inline=True)
+
+            await loading.edit(content=None, embed=embed)
 
 
 bot.run(TOKEN)
