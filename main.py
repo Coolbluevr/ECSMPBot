@@ -33,11 +33,11 @@ async def serverstats(ctx):
     server = JavaServer.lookup(f"{ip}:{port}")
 
     try:
-status = server.status()
-data = status.raw
+        status = server.status()
+        data = status.raw
 
-online = data.get("players", {}).get("online", 0)
-max_players = data.get("players", {}).get("max", "?")
+        online = data.get("players", {}).get("online", 0)
+        max_players = data.get("players", {}).get("max", "?")
 
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
