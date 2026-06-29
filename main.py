@@ -26,10 +26,15 @@ async def serverstats(ctx):
     ip = "EternalCoreSMP.aternos.me"
     port = 25565
 
+    # 1. Loading message
+    loading = await ctx.send("⏳ Eternal Core is gathering stats...")
+
     try:
         server = JavaServer.lookup(f"{ip}:{port}")
 
-        # First try a status ping
+        # small delay helps reduce Aternos false results
+        await asyncio.sleep(1)
+
         status = server.status()
 
         embed = discord.Embed(
@@ -49,19 +54,17 @@ async def serverstats(ctx):
             inline=True
         )
 
-        await ctx.send(embed=embed)
+        await loading.edit(content=None, embed=embed)
 
-    except Exception as e:
+    except Exception:
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
             color=0xff0000
         )
+
         embed.add_field(name="Status", value="🔴 Offline", inline=True)
 
-        await ctx.send(embed=embed)
-
-    except Exception as e:
-        await ctx.send("🔴 Server is offline or unreachable.")
+        await loading.edit(content=None, embed=embed)
 print("Token loaded:", TOKEN is not None)
 print("Token starts with:", TOKEN[:10] if TOKEN else "None")
 bot.run(TOKEN)
