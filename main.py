@@ -23,18 +23,18 @@ async def on_ready():
 
 @bot.command()
 async def serverstats(ctx):
+    import asyncio
+    from mcstatus import JavaServer
+
     ip = "EternalCoreSMP.aternos.me"
     port = 25565
 
-    # 1. Loading message
     loading = await ctx.send("⏳ Eternal Core is gathering stats...")
 
+    server = JavaServer.lookup(f"{ip}:{port}")
+
     try:
-        server = JavaServer.lookup(f"{ip}:{port}")
-
-        # small delay helps reduce Aternos false results
-        await asyncio.sleep(1)
-
+        # FIRST: try status (gives player count)
         status = server.status()
 
         embed = discord.Embed(
@@ -55,8 +55,27 @@ async def serverstats(ctx):
         )
 
         await loading.edit(content=None, embed=embed)
+        return
 
-    except Exception:
+    except:
+        pass
+
+    try:
+        # SECOND: fallback simple ping check
+        ping = server.ping()
+
+        embed = discord.Embed(
+            title="🎮 Minecraft Server Stats",
+            color=0x00ff00
+        )
+
+        embed.add_field(name="Status", value="🟢 Online", inline=True)
+        embed.add_field(name="Ping", value=f"{round(ping)}ms", inline=True)
+        embed.add_field(name="Players", value="Unknown", inline=True)
+
+        await loading.edit(content=None, embed=embed)
+
+    except:
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
             color=0xff0000
