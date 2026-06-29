@@ -28,6 +28,8 @@ async def serverstats(ctx):
 
     try:
         server = JavaServer.lookup(f"{ip}:{port}")
+
+        # First try a status ping
         status = server.status()
 
         embed = discord.Embed(
@@ -46,6 +48,15 @@ async def serverstats(ctx):
             value=f"{round(status.latency)}ms",
             inline=True
         )
+
+        await ctx.send(embed=embed)
+
+    except Exception as e:
+        embed = discord.Embed(
+            title="🎮 Minecraft Server Stats",
+            color=0xff0000
+        )
+        embed.add_field(name="Status", value="🔴 Offline", inline=True)
 
         await ctx.send(embed=embed)
 
