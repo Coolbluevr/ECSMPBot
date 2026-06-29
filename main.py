@@ -34,29 +34,40 @@ async def serverstats(ctx):
     server = JavaServer.lookup(f"{ip}:{port}")
 
     try:
-        # Fast check (best for Aternos)
-        ping = await asyncio.wait_for(
-            asyncio.to_thread(server.ping),
-            timeout=3
+        # Try full status first (most accurate)
+        status = await asyncio.wait_for(
+            asyncio.to_thread(server.status),
+            timeout=12
         )
+
+        ping = getattr(status, "latency", None)
 
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
             color=0x00ff00
         )
-
         embed.add_field(name="Status", value="🟢 Online", inline=True)
-        embed.add_field(name="Ping", value=f"{round(ping)}ms", inline=True)
+        embed.add_field(
+            name="Ping",
+            value=f"{round(ping)}ms" if ping else "N/A",
+            inline=True
+        )
 
     except asyncio.TimeoutError:
+        # Aternos often sleeps or is starting up
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
-            color=0xff0000
+            color=0xffaa00
         )
-        embed.add_field(name="Status", value="🔴 Offline (timeout)", inline=True)
+        embed.add_field(
+            name="Status",
+            value="🟡 Starting / Sleeping",
+            inline=True
+        )
         embed.add_field(name="Ping", value="N/A", inline=True)
 
     except Exception:
+        # Real failure (server offline or unreachable)
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
             color=0xff0000
