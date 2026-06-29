@@ -1,8 +1,12 @@
 import discord
 from discord.ext import commands
 from mcstatus import JavaServer
+import os
+from dotenv import load_dotenv
 
-TOKEN = "MTUyMDkzODk1MTU4MDMxOTg4Ng.GwcBzF.mTZJvk9YczekSltYXdtkcI8ymubY29x64qlOME"
+load_dotenv()
+
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 intents = discord.Intents.default()
 intents.message_content = True
