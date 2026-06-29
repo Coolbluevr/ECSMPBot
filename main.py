@@ -49,5 +49,6 @@ async def serverstats(ctx):
 
     except Exception as e:
         await ctx.send("🔴 Server is offline or unreachable.")
-
+print("Token loaded:", TOKEN is not None)
+print("Token starts with:", TOKEN[:10] if TOKEN else "None")
 bot.run(TOKEN)
