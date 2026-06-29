@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import minecraft_status
+from mcstatus import JavaServer
 
 TOKEN = "YOUR_BOT_TOKEN"
 
@@ -21,7 +21,8 @@ async def serverstats(ctx):
     port = 25565
 
     try:
-        status = minecraft_status.get_status(ip, port)
+        server = JavaServer.lookup(f"{ip}:{port}")
+        status = server.status()
 
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
@@ -29,14 +30,20 @@ async def serverstats(ctx):
         )
 
         embed.add_field(name="Status", value="🟢 Online", inline=True)
-        embed.add_field(name="Players", value=f"{status['players']['online']}/{status['players']['max']}", inline=True)
-        embed.add_field(name="Ping", value=f"{status['latency']}ms", inline=True)
-        embed.add_field(name="Version", value=status["version"], inline=True)
+        embed.add_field(
+            name="Players",
+            value=f"{status.players.online}/{status.players.max}",
+            inline=True
+        )
+        embed.add_field(
+            name="Ping",
+            value=f"{round(status.latency)}ms",
+            inline=True
+        )
 
         await ctx.send(embed=embed)
 
-    except:
-        await ctx.send("🔴 Server is offline or unreachable. you may need to ping a Server Starter to start the server")
-
+    except Exception as e:
+        await ctx.send("🔴 Server is offline or unreachable.")
 
 bot.run(TOKEN)
