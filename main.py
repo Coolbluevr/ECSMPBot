@@ -29,54 +29,42 @@ async def serverstats(ctx):
     ip = "EternalCoreSMP.aternos.me"
     port = 25565
 
-    loading = await ctx.send("⏳ Eternal Core is gathering stats...")
+    loading = await ctx.send("⏳ Checking Eternal Core status...")
 
     server = JavaServer.lookup(f"{ip}:{port}")
 
     try:
-        status = await asyncio.to_thread(server.status)
-        data = status.raw
+        # Fast check (best for Aternos)
+        ping = await asyncio.wait_for(
+            asyncio.to_thread(server.ping),
+            timeout=3
+        )
+
         embed = discord.Embed(
             title="🎮 Minecraft Server Stats",
             color=0x00ff00
         )
 
         embed.add_field(name="Status", value="🟢 Online", inline=True)
+        embed.add_field(name="Ping", value=f"{round(ping)}ms", inline=True)
 
-        # latency safe handling
-        ping = getattr(status, "latency", None)
-        embed.add_field(
-            name="Ping",
-            value=f"{round(ping)}ms" if ping else "N/A",
-            inline=True
+    except asyncio.TimeoutError:
+        embed = discord.Embed(
+            title="🎮 Minecraft Server Stats",
+            color=0xff0000
         )
+        embed.add_field(name="Status", value="🔴 Offline (timeout)", inline=True)
+        embed.add_field(name="Ping", value="N/A", inline=True)
 
-        await loading.edit(content=None, embed=embed)
-        return
+    except Exception:
+        embed = discord.Embed(
+            title="🎮 Minecraft Server Stats",
+            color=0xff0000
+        )
+        embed.add_field(name="Status", value="🔴 Offline", inline=True)
+        embed.add_field(name="Ping", value="N/A", inline=True)
 
-    except:
-        try:
-            ping = await asyncio.to_thread(server.ping)
-
-            embed = discord.Embed(
-                title="🎮 Minecraft Server Stats",
-                color=0x00ff00
-            )
-
-            embed.add_field(name="Status", value="🟢 Online", inline=True)
-            embed.add_field(name="Ping", value=f"{round(ping)}ms", inline=True)
-
-            await loading.edit(content=None, embed=embed)
-
-        except:
-            embed = discord.Embed(
-                title="🎮 Minecraft Server Stats",
-                color=0xff0000
-            )
-
-            embed.add_field(name="Status", value="🔴 Offline", inline=True)
-
-            await loading.edit(content=None, embed=embed)
+    await loading.edit(content=None, embed=embed)
 
 
 bot.run(TOKEN)
