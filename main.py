@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from mcstatus import JavaServer
 
-TOKEN = "YOUR_BOT_TOKEN"
+TOKEN = "MTUyMDkzODk1MTU4MDMxOTg4Ng.GwcBzF.mTZJvk9YczekSltYXdtkcI8ymubY29x64qlOME"
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -17,7 +17,7 @@ async def on_ready():
 
 @bot.command()
 async def serverstats(ctx):
-    ip = "YOUR_SERVER_IP"
+    ip = "EternalCoreSMP.aternos.me"
     port = 25565
 
     try:
